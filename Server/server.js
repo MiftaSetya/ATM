@@ -87,7 +87,27 @@ app.post("/rekeningbaru", (req, res) => {
             return
         }
 
-        res.status(201).json({ message: "Berhasil membuat rekening baru" })
+        const newAccountId = result.insertId
+
+        pool.query("SELECT * FROM Rekening WHERE ID = ?", [newAccountId], (err, rows) => {
+            if (err) {
+                res.json("Error executing query", err)
+                res.status(500).json({ message: "Internal server error" })
+                return
+            }
+    
+            if (rows.length === 0) {
+                res.status(404).json({ message: "Rekening tidak ditemukan" })
+                return
+            }
+    
+            const newRekening = rows[0]
+
+            res.status(201).json({ 
+                message: "Berhasil membuat rekening baru" ,
+                data: newRekening
+            })
+        })
     })
 })
 
@@ -141,6 +161,11 @@ app.post("/tarik-tunai", (req, res) => {
         const rekening = rows[0]
 
         const saldoBaru = rekening.Saldo - Nominal
+
+        if (saldoBaru < rekening.MinimalSaldo) {
+            res.status(403).json({ message: `Saldo tidak boleh kurang dari Rp.${rekening.MinimalSaldo}` })
+            return
+        }
 
         pool.query("UPDATE Rekening SET Saldo = ? WHERE ID = ?", [ saldoBaru, RekeningId ], (err, result) => {
             if (err) {
