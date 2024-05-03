@@ -1,28 +1,38 @@
 import React, { useEffect, useState } from 'react';
 
 export default function Dashboard() {
-  const [data, setData] = useState();
+  const [rekening, setRekening] = useState([]);
 
-    useEffect(() => {
+  useEffect(() => {
+    const fetchData = async () => {
       try {
-        fetch('http://localhost:3000/rekening') // Endpoint yang kamu buat di Express
-            .then((res) => res.json(res))
-            .then((result) => setData(result))
-            .catch((err) => console.log(err));
-        
-        console.log("p");
+        const response = await fetch('http://localhost:3000/rekening'); // Endpoint API Express
+        if (!response.ok) {
+          throw new Error('Gagal mendapatkan data rekening');
+        }
+        const data = await response.json();
+        setRekening(data);
         console.log(data);
-        
       } catch (error) {
-        console.log(error);
+        console.error('Error:', error);
       }
-        
-    }, []);
+    };
+    fetchData();
+  }, []);
 
-    return (
-        <div>
-            <h1>Data dari Server:</h1>
-            <p>{data}</p>
-        </div>
-    );
+  return (
+    <div>
+      <h1>Daftar Rekening</h1>
+      <ul>
+        {rekening.map((item) => (
+          <li key={item.ID}>
+            <strong>Pemilik:</strong> {item.Pemilik}, 
+            <strong> Nama Bank:</strong> {item.NamaBank}, 
+            <strong> No Kartu:</strong> {item.NoKartu}, 
+            <strong> Pin:</strong> {item.Pin}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
