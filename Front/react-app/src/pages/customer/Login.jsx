@@ -1,30 +1,30 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useHistory from React Router DOM
-import { AuthContext } from '../AuthContext';
+import { AuthContext } from '../../AuthContext';
 
 export default function Login() {
-   const [username, setUsername] = useState('');
-   const [password, setPassword] = useState('');
+   const [NoKartu, setUsername] = useState('');
+   const [Pin, setPassword] = useState('');
    const [error, setError] = useState('');
    const history = useNavigate(); // Initialize useHistory
-   const { loginU } = React.useContext(AuthContext);
+   const { loginC } = React.useContext(AuthContext);
 
    const handleLogin = async (e) => {
       e.preventDefault();
       try {
-         const response = await fetch('http://localhost:3000/login/user', {
+         const response = await fetch('http://localhost:3000/login/customer', {
             method: 'POST',
             headers: {
                'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ username, password }),
+            body: JSON.stringify({ NoKartu, Pin }),
          });
          const data = await response.json();
          if (!response.ok) {
             throw new Error(data.error || 'Username atau Password salah');
          }
          setError('');
-         loginU();
+         loginC();
          history('/dashboard'); // Navigate to /dashboard after successful login
       } catch (error) {
          console.error('Error:', error);
@@ -41,17 +41,17 @@ export default function Login() {
                      <div class="col-lg-5 col-md-6">
                         <div class="card card-default">
                            <div class="card-body">
-                              <h3 class="mb-3">Login User</h3>
+                              <h3 class="mb-3">Login</h3>
                               {error && <div style={{ color: 'red' }}>{error}</div>}
                               <form onSubmit={handleLogin}>
                                  <div class="form-group my-3">
-                                    <label for="username" class="mb-1 text-muted">Username</label>
-                                    <input type="text" id="username" name="username" value={username} onChange={(e) => setUsername(e.target.value)} class="form-control" autofocus />
+                                    <label for="username" class="mb-1 text-muted">NoKartu</label>
+                                    <input type="number" id="username" name="username" value={NoKartu} onChange={(e) => setUsername(e.target.value)} class="form-control" autofocus />
                                  </div>
 
                                  <div class="form-group my-3">
-                                    <label for="password" class="mb-1 text-muted">Password</label>
-                                    <input type="password" id="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} class="form-control" />
+                                    <label for="password" class="mb-1 text-muted">Pin</label>
+                                    <input type="number" id="password" name="password" value={Pin} onChange={(e) => setPassword(e.target.value)} class="form-control" />
                                  </div>
 
                                  <div class="mt-4 row">
