@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { AuthContext } from '../AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
   const [rekening, setRekening] = useState([]);
+  const history = useNavigate();
+  const { isAuthenticated } = React.useContext(AuthContext);
+
+  if (!isAuthenticated) {
+    history('/login');
+  }
 
   useEffect(() => {
     const fetchData = async () => {

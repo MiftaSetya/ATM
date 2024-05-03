@@ -27,7 +27,7 @@ app.post("/login/user", (req, res) => {
         }
 
         if (rows.length === 0) {
-            res.json("Pengguna tidak ditemukan")
+            res.status(404).json("Pengguna tidak ditemukan")
             return
         }
 
