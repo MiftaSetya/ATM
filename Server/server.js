@@ -1,17 +1,18 @@
 require("dotenv").config()
 const mysql = require('mysql');
 const express = require("express");
-const app = express()
+const cors = require('cors')
 
-const pool = mysql.createPool({
+const app = express()
+app.use(cors())
+
+const pool = mysql.createConnection({
     host: process.env.HOST,
     port: process.env.PORT,
     user: process.env.USER,
     password: process.env.PASSWORD,
     database: process.env.DB
 })
-
-app.use(express.json())
 
 app.post("/login/user", (req, res) => {
     const { username, password } = req.body
