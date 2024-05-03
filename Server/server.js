@@ -28,9 +28,26 @@ app.post("/login/user", (req, res) => {
             return
         }
 
-        const user = rows[0]
+        res.json(rows[0])
+    })
+})
 
-        res.json(user)
+app.post("/login/customer", (req, res) => {
+    const { NoKartu, Pin } = req.body
+
+    pool.query("SELECT * FROM Rekening WHERE NoKartu = ? AND Pin = ?", [NoKartu, Pin], (err, rows) => {
+        if (err) {
+            console.log("Error executing query", err)
+            res.status(500).json({ error: "Internal server error" })
+            return
+        }
+
+        if (rows.length === 0) {
+            res.json("Rekening tidak ditemukan")
+            return
+        }
+
+        res.json(rows[0])
     })
 })
 
@@ -75,7 +92,7 @@ app.get("/saldo/:id", (req, res) => {
             return
         }
 
-        const saldo = rows[0].Saldo
+        const saldo = rows[0]
         res.json(saldo)
     })
 })
