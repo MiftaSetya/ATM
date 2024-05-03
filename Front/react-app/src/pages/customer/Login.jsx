@@ -21,7 +21,7 @@ export default function Login() {
          });
          const data = await response.json();
          if (!response.ok) {
-            throw new Error(data.error || 'Username atau Password salah');
+            throw new Error(data.error || 'NoKartu atau Pin salah');
          }
          setError('');
          loginC();
