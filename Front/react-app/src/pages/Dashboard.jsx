@@ -8,7 +8,7 @@ export default function Dashboard() {
   const { isAuthenticated } = React.useContext(AuthContext);
 
   if (!isAuthenticated) {
-    history('/login');
+    history('/login/user');
   }
 
   useEffect(() => {

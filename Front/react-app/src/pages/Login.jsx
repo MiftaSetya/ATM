@@ -39,10 +39,9 @@ export default function Login() {
                <div class="container">
                   <div class="row justify-content-center">
                      <div class="col-lg-5 col-md-6">
-                        <h1 class="text-center mb-4">Gaming Portal</h1>
                         <div class="card card-default">
                            <div class="card-body">
-                              <h3 class="mb-3">Sign In</h3>
+                              <h3 class="mb-3">Login</h3>
                               {error && <div style={{ color: 'red' }}>{error}</div>}
                               <form onSubmit={handleLogin}>
                                  <div class="form-group my-3">
@@ -57,12 +56,8 @@ export default function Login() {
 
                                  <div class="mt-4 row">
                                     <div class="col">
-                                       <button type="submit" class="btn btn-primary w-100">Sign In</button>
+                                       <button type="submit" class="btn btn-primary w-100">Login</button>
                                     </div>
-                                    <div class="col">
-                                       <a href="Gaming Portal/signup.html" class="btn btn-danger w-100">Sign up</a>
-                                    </div>
-
                                  </div>
                               </form>
                            </div>
