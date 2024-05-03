@@ -47,7 +47,7 @@ app.post("/login/customer", (req, res) => {
         }
 
         if (rows.length === 0) {
-            res.json("Rekening tidak ditemukan")
+            res.status(404).json("Rekening tidak ditemukan")
             return
         }
 
@@ -56,18 +56,66 @@ app.post("/login/customer", (req, res) => {
 })
 
 app.post("/rekeningbaru", (req, res) => {
-    const { Pemilik, NamaBank, NoKartu, Pin, Saldo } = req.body;
+    const { Pemilik, NamaBank, Pin, Saldo } = req.body
 
-    pool.query("INSERT INTO Rekening (Pemilik, NamaBank, NoKartu, Pin, Saldo) VALUES (?, ?, ?, ?, ?)", [Pemilik, NamaBank, NoKartu, Pin, Saldo], (err, result) => {
+    if (!(/^\d{6}$/.test(Pin))) {
+        res.status(400).json({ message: "Pin harus berupa 6 digit angka" })
+        return
+    }
+
+    let MinimalSaldo = 0;
+
+    switch (NamaBank) {
+        case "BRI":
+            MinimalSaldo = 25000;
+            break;
+        case "BCA":
+            MinimalSaldo = 50000;
+            break;
+        case "BNI":
+            MinimalSaldo = 40000;
+            break;
+        case "Mandiri":
+            MinimalSaldo = 30000;
+            break;
+        default:
+            MinimalSaldo = 0;
+            break;
+    }
+
+    const NoKartu = Math.floor(10000000 + Math.random() * 90000000);
+
+    pool.query("INSERT INTO Rekening (Pemilik, NamaBank, NoKartu, Pin, Saldo, MinimalSaldo) VALUES (?, ?, ?, ?, ?, ?)", [Pemilik, NamaBank, NoKartu, Pin, Saldo, MinimalSaldo], (err, result) => {
         if (err) {
-            console.log("Error executing query:", err);
+            console.log("Error executing query:", err)
             res.status(500).json({ error: "Internal server error" })
             return
         }
 
-        res.status(201).json({ message: "Berhasil membuat rekening baru"})
+        const newAccountId = result.insertId
+
+        pool.query("SELECT * FROM Rekening WHERE ID = ?", [newAccountId], (err, rows) => {
+            if (err) {
+                res.json("Error executing query", err)
+                res.status(500).json({ message: "Internal server error" })
+                return
+            }
+    
+            if (rows.length === 0) {
+                res.status(404).json({ message: "Rekening tidak ditemukan" })
+                return
+            }
+    
+            const newRekening = [rows[0]]
+
+            res.status(201).json({ 
+                message: "Berhasil membuat rekening baru" ,
+                data: newRekening
+            })
+        })
     })
 })
+
 
 app.post("/setor-tunai", (req, res) => {
     const { RekeningId, Nominal } = req.body
@@ -118,6 +166,11 @@ app.post("/tarik-tunai", (req, res) => {
         const rekening = rows[0]
 
         const saldoBaru = rekening.Saldo - Nominal
+
+        if (saldoBaru < rekening.MinimalSaldo) {
+            res.status(403).json({ message: `Saldo tidak boleh kurang dari Rp.${rekening.MinimalSaldo}` })
+            return
+        }
 
         pool.query("UPDATE Rekening SET Saldo = ? WHERE ID = ?", [ saldoBaru, RekeningId ], (err, result) => {
             if (err) {
