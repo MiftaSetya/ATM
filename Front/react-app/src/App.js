@@ -11,9 +11,9 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/login/user" element={<LoginU />} />
+          <Route path="/login-user" element={<LoginU />} />
           <Route path="/login" element={<LoginC />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard-user" element={<Dashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

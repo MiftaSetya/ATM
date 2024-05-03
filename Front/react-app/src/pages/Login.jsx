@@ -27,7 +27,7 @@ export default function Login() {
          setIdU(data.id);
          setError('');
          loginU();
-         history('/dashboard'); 
+         history('/dashboard-user'); 
       } catch (error) {
          console.error('Error:', error);
          setError(error.message || 'Terjadi kesalahan saat login');
