@@ -5,9 +5,9 @@ import { useNavigate } from 'react-router-dom';
 export default function Dashboard() {
   const [rekening, setRekening] = useState([]);
   const history = useNavigate();
-  const { isAuthenticated } = React.useContext(AuthContext);
+  const { isUserAuthenticated } = React.useContext(AuthContext);
 
-  if (!isAuthenticated) {
+  if (!isUserAuthenticated) {
     history('/login/user');
   }
 
