@@ -7,7 +7,7 @@ export default function Login() {
    const [password, setPassword] = useState('');
    const [error, setError] = useState('');
    const history = useNavigate(); // Initialize useHistory
-   const { loginU } = React.useContext(AuthContext);
+   const { loginU, setIdU } = React.useContext(AuthContext);
 
    const handleLogin = async (e) => {
       e.preventDefault();
@@ -23,9 +23,11 @@ export default function Login() {
          if (!response.ok) {
             throw new Error(data.error || 'Username atau Password salah');
          }
+
+         setIdU(data.id);
          setError('');
          loginU();
-         history('/dashboard'); // Navigate to /dashboard after successful login
+         history('/dashboard'); 
       } catch (error) {
          console.error('Error:', error);
          setError(error.message || 'Terjadi kesalahan saat login');
