@@ -7,7 +7,7 @@ export default function Login() {
    const [password, setPassword] = useState('');
    const [error, setError] = useState('');
    const history = useNavigate(); // Initialize useHistory
-   const { login } = React.useContext(AuthContext);
+   const { loginU } = React.useContext(AuthContext);
 
    const handleLogin = async (e) => {
       e.preventDefault();
@@ -24,7 +24,7 @@ export default function Login() {
             throw new Error(data.error || 'Username atau Password salah');
          }
          setError('');
-         login();
+         loginU();
          history('/dashboard'); // Navigate to /dashboard after successful login
       } catch (error) {
          console.error('Error:', error);
@@ -57,7 +57,7 @@ export default function Login() {
                                  <div class="mt-4 row">
                                     <div class="col">
                                        <button type="submit" class="btn btn-primary w-100">Login</button>
-                                    </div>
+                                    </div>   
                                  </div>
                               </form>
                            </div>
