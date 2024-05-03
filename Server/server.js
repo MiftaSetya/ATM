@@ -47,7 +47,7 @@ app.post("/login/customer", (req, res) => {
         }
 
         if (rows.length === 0) {
-            res.json("Rekening tidak ditemukan")
+            res.status(404).json("Rekening tidak ditemukan")
             return
         }
 
@@ -58,7 +58,26 @@ app.post("/login/customer", (req, res) => {
 app.post("/rekeningbaru", (req, res) => {
     const { Pemilik, NamaBank, NoKartu, Pin, Saldo } = req.body;
 
-    pool.query("INSERT INTO Rekening (Pemilik, NamaBank, NoKartu, Pin, Saldo) VALUES (?, ?, ?, ?, ?)", [Pemilik, NamaBank, NoKartu, Pin, Saldo], (err, result) => {
+    let MinimalSaldo = 0
+
+    switch (NamaBank) {
+        case "BRI":
+            MinimalSaldo = 25000
+            break
+        case "BCA":
+            MinimalSaldo = 50000
+            break
+        case "BNI":
+            MinimalSaldo = 40000
+        case "Mandiri":
+            MinimalSaldo = 30000
+            break
+        default:
+            MinimalSaldo = 0
+            break
+    }
+
+    pool.query("INSERT INTO Rekening (Pemilik, NamaBank, NoKartu, Pin, Saldo, MinimalSaldo) VALUES (?, ?, ?, ?, ?)", [Pemilik, NamaBank, NoKartu, Pin, Saldo, MinimalSaldo], (err, result) => {
         if (err) {
             console.log("Error executing query:", err);
             res.status(500).json({ error: "Internal server error" })
