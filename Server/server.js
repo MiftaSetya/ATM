@@ -63,14 +63,15 @@ app.post("/rekeningbaru", (req, res) => {
 app.get("/saldo/:id", (req, res) => {
     const rekeningId = req.params.id    
 
-    pool.query("SELECT Saldo FROM Rekening WHERE ID = ?", [rekeningId], (req, rows) => {
+    pool.query("SELECT Saldo FROM Rekening Where ID = ?", [rekeningId], (err, rows) => {
         if (err) {
             res.json("Gagal cek saldo", err)
             res.status(500).json({ message: "Internal server error" })
+            return
         }
 
         if (rows.length === 0) {
-            res.json("Rekening tidak ditemukan")
+            res.status(404).json("Rekening tidak ditemukan")
             return
         }
 
