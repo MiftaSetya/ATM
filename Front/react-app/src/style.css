@@ -18,3 +18,8 @@ a.card {
 .form-control:disabled, .form-select:disabled, textarea:disabled {
    background-color: #f5f5f5;
 }
+
+.active{
+   border-bottom: solid 1px white;
+   font-weight: bolder !important;
+}
