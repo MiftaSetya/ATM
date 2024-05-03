@@ -58,6 +58,11 @@ app.post("/login/customer", (req, res) => {
 app.post("/rekeningbaru", (req, res) => {
     const { Pemilik, NamaBank, Pin, Saldo } = req.body
 
+    if (!(/^\d{6}$/.test(Pin))) {
+        res.status(400).json({ message: "Pin harus berupa 6 digit angka" })
+        return
+    }
+
     let MinimalSaldo = 0;
 
     switch (NamaBank) {
