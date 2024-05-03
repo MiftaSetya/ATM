@@ -16,6 +16,7 @@ const pool = mysql.createConnection({
     database: process.env.DB
 })
 
+// POST --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 app.post("/login/user", (req, res) => {
     const { username, password } = req.body
 
@@ -54,18 +55,6 @@ app.post("/login/customer", (req, res) => {
     })
 })
 
-app.get("/rekening", (req, res) => {
-    pool.query("SELECT * FROM Rekening", (err, rows) => {
-        if (err) {
-            res.json("Gagal mendapatkan semua rekening")
-            res.status(500).json({ error: "Internal server error" })
-            return
-        }
-
-        res.json(rows)
-    })
-})
-
 app.post("/rekeningbaru", (req, res) => {
     const { Pemilik, NamaBank, NoKartu, Pin, Saldo } = req.body;
 
@@ -77,6 +66,81 @@ app.post("/rekeningbaru", (req, res) => {
         }
 
         res.status(201).json({ message: "Berhasil membuat rekening baru"})
+    })
+})
+
+app.post("/setor-tunai", (req, res) => {
+    const { RekeningId, Nominal } = req.body
+
+    pool.query("SELECT * FROM Rekening WHERE ID = ?", [RekeningId], (err, rows) => {
+        if (err) {
+            res.json("Error executing query", err)
+            res.status(500).json({ message: "Internal server error" })
+            return
+        }
+
+        if (rows.length === 0) {
+            res.status(404).json({ message: "Rekening tidak ditemukan" })
+            return
+        }
+
+        const rekening = rows[0]
+
+        const saldoBaru = rekening.Saldo + Nominal
+
+        pool.query("UPDATE Rekening SET Saldo = ? WHERE ID = ?", [ saldoBaru, RekeningId ], (err, result) => {
+            if (err) {
+                console.log("Error executing query", err)
+                res.status(500).json({ message: "Internal server error" })
+                return
+            }
+
+            res.status(200).json({ message: `Setor tunai dengan nominal Rp.${Nominal} berhasil`})
+        })
+    })
+})
+
+app.post("/tarik-tunai", (req, res) => {
+    const { RekeningId, Nominal } = req.body
+
+    pool.query("SELECT * FROM Rekening WHERE ID = ?", [RekeningId], (err, rows) => {
+        if (err) {
+            res.json("Error executing query", err)
+            res.status(500).json({ message: "Internal server error" })
+            return
+        }
+
+        if (rows.length === 0) {
+            res.status(404).json({ message: "Rekening tidak ditemukan" })
+            return
+        }
+
+        const rekening = rows[0]
+
+        const saldoBaru = rekening.Saldo - Nominal
+
+        pool.query("UPDATE Rekening SET Saldo = ? WHERE ID = ?", [ saldoBaru, RekeningId ], (err, result) => {
+            if (err) {
+                console.log("Error executing query", err)
+                res.status(500).json({ message: "Internal server error" })
+                return
+            }
+
+            res.status(200).json({ message: `Tarik tunai dengan nominal Rp.${Nominal} berhasil`})
+        })
+    })
+})
+
+// GET ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+app.get("/rekening", (req, res) => {
+    pool.query("SELECT * FROM Rekening", (err, rows) => {
+        if (err) {
+            res.json("Gagal mendapatkan semua rekening")
+            res.status(500).json({ error: "Internal server error" })
+            return
+        }
+
+        res.json(rows)
     })
 })
 
