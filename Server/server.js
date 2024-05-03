@@ -56,37 +56,41 @@ app.post("/login/customer", (req, res) => {
 })
 
 app.post("/rekeningbaru", (req, res) => {
-    const { Pemilik, NamaBank, NoKartu, Pin, Saldo } = req.body;
+    const { Pemilik, NamaBank, Pin, Saldo } = req.body
 
-    let MinimalSaldo = 0
+    let MinimalSaldo = 0;
 
     switch (NamaBank) {
         case "BRI":
-            MinimalSaldo = 25000
-            break
+            MinimalSaldo = 25000;
+            break;
         case "BCA":
-            MinimalSaldo = 50000
-            break
+            MinimalSaldo = 50000;
+            break;
         case "BNI":
-            MinimalSaldo = 40000
+            MinimalSaldo = 40000;
+            break;
         case "Mandiri":
-            MinimalSaldo = 30000
-            break
+            MinimalSaldo = 30000;
+            break;
         default:
-            MinimalSaldo = 0
-            break
+            MinimalSaldo = 0;
+            break;
     }
 
-    pool.query("INSERT INTO Rekening (Pemilik, NamaBank, NoKartu, Pin, Saldo, MinimalSaldo) VALUES (?, ?, ?, ?, ?)", [Pemilik, NamaBank, NoKartu, Pin, Saldo, MinimalSaldo], (err, result) => {
+    const NoKartu = Math.floor(10000000 + Math.random() * 90000000);
+
+    pool.query("INSERT INTO Rekening (Pemilik, NamaBank, NoKartu, Pin, Saldo, MinimalSaldo) VALUES (?, ?, ?, ?, ?, ?)", [Pemilik, NamaBank, NoKartu, Pin, Saldo, MinimalSaldo], (err, result) => {
         if (err) {
-            console.log("Error executing query:", err);
+            console.log("Error executing query:", err)
             res.status(500).json({ error: "Internal server error" })
             return
         }
 
-        res.status(201).json({ message: "Berhasil membuat rekening baru"})
+        res.status(201).json({ message: "Berhasil membuat rekening baru" })
     })
 })
+
 
 app.post("/setor-tunai", (req, res) => {
     const { RekeningId, Nominal } = req.body
