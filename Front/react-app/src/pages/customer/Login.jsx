@@ -32,6 +32,12 @@ export default function Login() {
       }
    };
 
+   const handleInputChange = (e) => {
+      const inputValue = e.target.value;
+      const sanitizedValue = inputValue.replace(/\D/g, '');
+      setPassword(sanitizedValue);
+  }
+
    return (
       <div className=''>
          <main>
@@ -51,7 +57,7 @@ export default function Login() {
 
                                  <div class="form-group my-3">
                                     <label for="password" class="mb-1 text-muted">Pin</label>
-                                    <input type="number" id="password" name="password" value={Pin} onChange={(e) => setPassword(e.target.value)} class="form-control" />
+                                    <input type="password" id="pin" name='password' class='form-control' value={Pin} maxLength={6} onChange={handleInputChange} />
                                  </div>
 
                                  <div class="mt-4 row">
