@@ -187,6 +187,7 @@ app.post("/transfer", (req, res) => {
 
     pool.query("SELECT * FROM Rekening WHERE ID = ?", [DariRekId], (err, rows) => {
         if (err) {
+            console.log(err)
             res.status(500).json({ error: "Internal server error" })
             return
         }
@@ -197,6 +198,11 @@ app.post("/transfer", (req, res) => {
         }
 
         const rekeningPengirim = rows[0]
+
+        if (NoRekTujuan === rekeningPengirim.NoKartu) {
+            res.status(400).json({ error: "Tidak bisa transfer ke rekening sendiri"})
+            return
+        }
 
         if (rekeningPengirim.Pin !== Pin) {
             res.status(403).json({ error: "Pin yang anda masukkan salah" })
@@ -210,6 +216,7 @@ app.post("/transfer", (req, res) => {
 
         pool.query("SELECT * FROM Rekening WHERE Nokartu = ?", [NoRekTujuan], (err, rows) => {
             if (err) {
+                console.log(err)
                 res.status(500).json({ error: "Internal server error" })
                 return
             }
@@ -221,7 +228,29 @@ app.post("/transfer", (req, res) => {
 
             const rekeningPenerima = rows[0]
 
-            const saldoSetelahTransfer = rekeningPengirim.Saldo - Nominal
+            const namaBankPenerima = rekeningPenerima.NamaBank
+
+            let biayaAdmin = 0;
+
+            switch (namaBankPenerima) {
+                case "BRI":
+                    biayaAdmin = 2500;
+                    break;
+                case "BCA":
+                    biayaAdmin = 5000;
+                    break;
+                case "BNI":
+                    biayaAdmin = 1700;
+                    break;
+                case "Mandiri":
+                    biayaAdmin = 4000;
+                    break;
+                default:
+                    biayaAdmin = 10000;
+                    break;
+            }
+
+            const saldoSetelahTransfer = rekeningPengirim.Saldo - Nominal - biayaAdmin
 
             if (saldoSetelahTransfer < rekeningPengirim.MinimalSaldo) {
                 res.status(403).json({ error: `Saldo tidak boleh kurang dari Rp.${rekeningPengirim.MinimalSaldo}` })
@@ -230,6 +259,7 @@ app.post("/transfer", (req, res) => {
 
             pool.query("UPDATE Rekening SET Saldo = ? WHERE ID = ?", [ saldoSetelahTransfer, DariRekId ], (err, result) => {
                 if (err) {
+                    console.log(err)
                     res.status(500).json({ error: "Internal server error" })
                     return
                 }
@@ -238,18 +268,23 @@ app.post("/transfer", (req, res) => {
 
                 pool.query("UPDATE Rekening SET Saldo = ? WHERE ID = ?", [ saldoPenerima, rekeningPenerima.ID ], (err, result) => {
                     if (err) {
+                        console.log(err)
                         res.status(500).json({ error: "Internal server error" })
                         return
                     }
 
                     const tanggalTransfer = new Date().toISOString().slice(0, 19).replace('T', ' ')
-                    pool.query("INSERT INTO Transaksi (DariRekId, KeRekId, Tanggal, Nominal) VALUES (?, ?, ?, ?)", [DariRekId, rekeningPenerima.ID, tanggalTransfer, Nominal], (err, result) => {
+                    pool.query("INSERT INTO Transfer (DariRekId, KeRekId, Tanggal, Nominal) VALUES (?, ?, ?, ?)", [DariRekId, rekeningPenerima.ID, tanggalTransfer, Nominal], (err, result) => {
                         if (err) {
+                            console.log(err)
                             res.status(500).json({ error: "Internal server error" })
                             return
                         }
 
-                        res.status(200).json({ message: `Transfer ke rekening ${rekeningPenerima.NamaBank} atas nama ${rekeningPenerima.Pemilik} dengan nominal Rp.${Nominal} berhasil`})
+                        res.status(200).json({ 
+                            message: `Transfer ke rekening ${rekeningPenerima.NamaBank} atas nama ${rekeningPenerima.Pemilik} dengan nominal Rp.${Nominal} berhasil`,
+                            data: `Rp.${biayaAdmin}`
+                        })
                     })
                 })
             })
