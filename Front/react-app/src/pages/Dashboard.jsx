@@ -70,8 +70,10 @@ export default function Dashboard() {
           </div>
         </nav>
 
+
+
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 ">
-          <div className='flex flex-col '>
+          {/* <div className='flex flex-col '>
             <div className='flex flex-col justify-center w-full px-6 self-center'>
               <div className='flex font-extrabold my-10 justify-between'>
 
@@ -114,7 +116,7 @@ export default function Dashboard() {
                   </div>
                   {rekening.map((item) => (
                     <div className='font-normal border-2 border-slate-500 border-y-0 py-1 px-3 w-full'>
-                      {item.Pin}
+                      ******
                     </div>
                   ))}
                 </div>
@@ -130,6 +132,40 @@ export default function Dashboard() {
                   ))}
                 </div>
               </div>
+            </div>
+          </div> */}
+          <div class="list-form py-5">
+            <div class="container">
+              <h6 class="mb-3">List Semua Rekening</h6>
+
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Nama Pemilik</th>
+                    <th>Nomor Kartu</th>
+                    <th>Bank</th>
+                    <th>Saldo</th>
+                    <th>Pin</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rekening.map((item) => (
+                    <tr>
+                      <td>{item.Pemilik}</td>
+                      <td>{item.NoKartu}</td>
+                      <td>{item.NamaBank}</td>
+                      <td>Rp.{item.Saldo}</td>
+                      <td>
+                        <span class="hover-pin">
+                          <span class="pin-info">{item.Pin}</span>
+                          <span class="pin-deploy">*********</span>
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
             </div>
           </div>
         </main>

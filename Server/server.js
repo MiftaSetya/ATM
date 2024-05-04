@@ -106,7 +106,7 @@ app.post("/rekeningbaru", (req, res) => {
                 return
             }
     
-            const newRekening = [rows[0]]
+            const newRekening = rows[0]
 
             res.status(201).json({ 
                 message: "Berhasil membuat rekening baru" ,
