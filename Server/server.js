@@ -116,6 +116,55 @@ app.post("/rekeningbaru", (req, res) => {
     })
 })
 
+app.post("/virtual-account", (req, res) => {
+    const { Pemilik, NoTelepon, Jenis, Pin } = req.body
+
+    if (!(/^\d{10,13}$/).test(NoTelepon)) {
+        res.status(400).json({ error: "No. Telepon harus berupa 10-13 digit angka" })
+        return
+    }
+
+    if (!(/^\d{6}$/.test(Pin))) {
+        res.status(400).json({ error: "Pin harus berupa 6 digit angka" })
+        return
+    }
+
+    pool.query("SELECT * FROM VirtualAccount WHERE NoTelepon = ? AND Jenis = ?", [NoTelepon, Jenis], (err, rows) => {
+        if (err) {
+            console.log("Error executing query:", err)
+            res.status(500).json({ error: "Internal server error" })
+            return
+        }
+
+        if (rows.length > 0) {
+            res.status(409).json({ error: "Nomor telepon sudah terdaftar" })
+            return
+        }
+
+        pool.query("INSERT INTO VirtualAccount (Pemilik, NoTelepon, Jenis, Pin) VALUES (?, ?, ?, ?)", [Pemilik, NoTelepon, Jenis, Pin], (err, result) => {
+            if (err) {
+                console.log("Error executing query:", err)
+                res.status(500).json({ error: "Internal server error" })
+                return
+            }
+    
+            const newAccountId = result.insertId
+    
+            pool.query("SELECT * FROM VirtualAccount WHERE ID = ?", [newAccountId], (err, rows) => {
+                if (err) {
+                    res.json("Error executing query", err)
+                    res.status(500).json({ error: "Internal server error" })
+                    return
+                }
+    
+                res.status(201).json({ 
+                    message: "Berhasil membuat virtual account baru" ,
+                    data: rows[0]
+                })
+            })
+        })
+    })
+})
 
 app.post("/setor-tunai", (req, res) => {
     const { RekeningId, Nominal } = req.body
