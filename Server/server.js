@@ -28,7 +28,7 @@ app.post("/login/user", (req, res) => {
         }
 
         if (rows.length === 0) {
-            res.status(404).json("Pengguna tidak ditemukan")
+            res.status(404).json({ error: "Pengguna tidak ditemukan"})
             return
         }
 
@@ -47,7 +47,7 @@ app.post("/login/customer", (req, res) => {
         }
 
         if (rows.length === 0) {
-            res.status(404).json("Rekening tidak ditemukan")
+            res.status(404).json({ error: "Rekening tidak ditemukan" })
             return
         }
 
@@ -59,7 +59,7 @@ app.post("/rekeningbaru", (req, res) => {
     const { Pemilik, NamaBank, Pin, Saldo } = req.body
 
     if (!(/^\d{6}$/.test(Pin))) {
-        res.status(400).json({ message: "Pin harus berupa 6 digit angka" })
+        res.status(400).json({ error: "Pin harus berupa 6 digit angka" })
         return
     }
 
@@ -97,12 +97,12 @@ app.post("/rekeningbaru", (req, res) => {
         pool.query("SELECT * FROM Rekening WHERE ID = ?", [newAccountId], (err, rows) => {
             if (err) {
                 res.json("Error executing query", err)
-                res.status(500).json({ message: "Internal server error" })
+                res.status(500).json({ error: "Internal server error" })
                 return
             }
     
             if (rows.length === 0) {
-                res.status(404).json({ message: "Rekening tidak ditemukan" })
+                res.status(404).json({ error: "Rekening tidak ditemukan" })
                 return
             }
     
@@ -123,12 +123,12 @@ app.post("/setor-tunai", (req, res) => {
     pool.query("SELECT * FROM Rekening WHERE ID = ?", [RekeningId], (err, rows) => {
         if (err) {
             res.json("Error executing query", err)
-            res.status(500).json({ message: "Internal server error" })
+            res.status(500).json({ error: "Internal server error" })
             return
         }
 
         if (rows.length === 0) {
-            res.status(404).json({ message: "Rekening tidak ditemukan" })
+            res.status(404).json({ error: "Rekening tidak ditemukan" })
             return
         }
 
@@ -139,7 +139,7 @@ app.post("/setor-tunai", (req, res) => {
         pool.query("UPDATE Rekening SET Saldo = ? WHERE ID = ?", [ saldoBaru, RekeningId ], (err, result) => {
             if (err) {
                 console.log("Error executing query", err)
-                res.status(500).json({ message: "Internal server error" })
+                res.status(500).json({ error: "Internal server error" })
                 return
             }
 
@@ -153,13 +153,12 @@ app.post("/tarik-tunai", (req, res) => {
 
     pool.query("SELECT * FROM Rekening WHERE ID = ?", [RekeningId], (err, rows) => {
         if (err) {
-            res.json("Error executing query", err)
-            res.status(500).json({ message: "Internal server error" })
+            res.status(500).json({ error: "Internal server error" })
             return
         }
 
         if (rows.length === 0) {
-            res.status(404).json({ message: "Rekening tidak ditemukan" })
+            res.status(404).json({ error: "Rekening tidak ditemukan" })
             return
         }
 
@@ -168,18 +167,92 @@ app.post("/tarik-tunai", (req, res) => {
         const saldoBaru = rekening.Saldo - Nominal
 
         if (saldoBaru < rekening.MinimalSaldo) {
-            res.status(403).json({ message: `Saldo tidak boleh kurang dari Rp.${rekening.MinimalSaldo}` })
+            res.status(403).json({ error: `Saldo tidak boleh kurang dari Rp.${rekening.MinimalSaldo}` })
             return
         }
 
         pool.query("UPDATE Rekening SET Saldo = ? WHERE ID = ?", [ saldoBaru, RekeningId ], (err, result) => {
             if (err) {
-                console.log("Error executing query", err)
-                res.status(500).json({ message: "Internal server error" })
+                res.status(500).json({ error: "Internal server error" })
                 return
             }
 
             res.status(200).json({ message: `Tarik tunai dengan nominal Rp.${Nominal} berhasil`})
+        })
+    })
+})
+
+app.post("/transfer", (req, res) => {
+    const { DariRekId, NoRekTujuan, Nominal, Pin } = req.body
+
+    pool.query("SELECT * FROM Rekening WHERE ID = ?", [DariRekId], (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: "Internal server error" })
+            return
+        }
+
+        if (rows.length === 0) {
+            res.status(404).json({ error: "Rekening tidak ditemukan" })
+            return
+        }
+
+        const rekeningPengirim = rows[0]
+
+        if (rekeningPengirim.Pin !== Pin) {
+            res.status(403).json({ error: "Pin yang anda masukkan salah" })
+            return
+        }
+
+        if (rekeningPengirim.Saldo < Nominal) {
+            res.status(403).json({ error: `Saldo tidak mencukupi` })
+            return
+        }
+
+        pool.query("SELECT * FROM Rekening WHERE Nokartu = ?", [NoRekTujuan], (err, rows) => {
+            if (err) {
+                res.status(500).json({ error: "Internal server error" })
+                return
+            }
+
+            if (rows.length === 0) {
+                res.status(404).json({ error: "Rekening tidak ditemukan" })
+                return
+            }
+
+            const rekeningPenerima = rows[0]
+
+            const saldoSetelahTransfer = rekeningPengirim.Saldo - Nominal
+
+            if (saldoSetelahTransfer < rekeningPengirim.MinimalSaldo) {
+                res.status(403).json({ error: `Saldo tidak boleh kurang dari Rp.${rekeningPengirim.MinimalSaldo}` })
+                return
+            }
+
+            pool.query("UPDATE Rekening SET Saldo = ? WHERE ID = ?", [ saldoSetelahTransfer, DariRekId ], (err, result) => {
+                if (err) {
+                    res.status(500).json({ error: "Internal server error" })
+                    return
+                }
+
+                const saldoPenerima = rekeningPenerima.Saldo + Nominal
+
+                pool.query("UPDATE Rekening SET Saldo = ? WHERE ID = ?", [ saldoPenerima, rekeningPenerima.ID ], (err, result) => {
+                    if (err) {
+                        res.status(500).json({ error: "Internal server error" })
+                        return
+                    }
+
+                    const tanggalTransfer = new Date().toISOString().slice(0, 19).replace('T', ' ')
+                    pool.query("INSERT INTO Transaksi (DariRekId, KeRekId, Tanggal, Nominal) VALUES (?, ?, ?, ?)", [DariRekId, rekeningPenerima.ID, tanggalTransfer, Nominal], (err, result) => {
+                        if (err) {
+                            res.status(500).json({ error: "Internal server error" })
+                            return
+                        }
+
+                        res.status(200).json({ message: `Transfer ke rekening ${rekeningPenerima.NamaBank} atas nama ${rekeningPenerima.Pemilik} dengan nominal Rp.${Nominal} berhasil`})
+                    })
+                })
+            })
         })
     })
 })
@@ -203,7 +276,7 @@ app.get("/saldo/:id", (req, res) => {
     pool.query("SELECT Saldo FROM Rekening Where ID = ?", [rekeningId], (err, rows) => {
         if (err) {
             res.json("Gagal cek saldo", err)
-            res.status(500).json({ message: "Internal server error" })
+            res.status(500).json({ error: "Internal server error" })
             return
         }
 
