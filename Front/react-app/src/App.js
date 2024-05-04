@@ -1,6 +1,6 @@
 // Import necessary modules
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import {AuthProvider} from './AuthContext';
+import { BrowserRouter as Router, Routes, Route, redirect, Navigate } from 'react-router-dom';
+import { AuthProvider } from './AuthContext';
 import LoginU from './pages/Login';
 import LoginC from './pages/customer/Login';
 import DashboardU from './pages/Dashboard';
@@ -13,7 +13,7 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path='/' to='/dashboard'/>
+        <Route path='/' element={<Navigate to='/dashboard' />} />
           <Route path="/login-user" element={<LoginU />} />
           <Route path="/login" element={<LoginC />} />
           <Route path="/dashboard-user" element={<DashboardU />} />
