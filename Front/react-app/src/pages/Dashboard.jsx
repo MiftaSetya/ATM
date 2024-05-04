@@ -73,67 +73,6 @@ export default function Dashboard() {
 
 
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 ">
-          {/* <div className='flex flex-col '>
-            <div className='flex flex-col justify-center w-full px-6 self-center'>
-              <div className='flex font-extrabold my-10 justify-between'>
-
-                <div className='flex flex-col w-full border-slate-500 border-b-2'>
-                  <div className=' bg-slate-400 border-slate-500 border-2 py-2 text-xl px-3'>
-                    Nama
-                  </div>
-                  {rekening.map((item) => (
-                    <div className='font-normal border-2 border-slate-500 border-y-0 py-1 px-3 w-full '>
-                      {item.Pemilik}
-                    </div>
-                  ))}
-                </div>
-
-                <div className='flex flex-col w-full border-slate-500 border-b-2'>
-                  <div className=' bg-slate-400 border-slate-500 border-2 py-2 text-xl px-3'>
-                    Bank
-                  </div>
-                  {rekening.map((item) => (
-                    <div className='font-normal border-2 border-slate-500 border-y-0 py-1 px-3 w-full'>
-                      {item.NamaBank}
-                    </div>
-                  ))}
-                </div>
-
-                <div className='flex flex-col w-full border-slate-500 border-b-2'>
-                  <div className=' bg-slate-400 border-slate-500 border-2 py-2 text-xl px-3'>
-                    Nomor Kartu
-                  </div>
-                  {rekening.map((item) => (
-                    <div className='font-normal border-2 border-slate-500 border-y-0 py-1 px-3 w-full'>
-                      {item.NoKartu}
-                    </div>
-                  ))}
-                </div>
-
-                <div className='flex flex-col w-full border-slate-500 border-b-2'>
-                  <div className=' bg-slate-400 border-slate-500 border-2 py-2 text-xl px-3'>
-                    Pin
-                  </div>
-                  {rekening.map((item) => (
-                    <div className='font-normal border-2 border-slate-500 border-y-0 py-1 px-3 w-full'>
-                      ******
-                    </div>
-                  ))}
-                </div>
-                
-                <div className='flex flex-col w-full border-slate-500 border-b-2'>
-                  <div className=' bg-slate-400 border-slate-500 border-2 py-2 text-xl px-3'>
-                    Saldo
-                  </div>
-                  {rekening.map((item) => (
-                    <div className='font-normal border-2 border-slate-500 border-y-0 py-1 px-3 w-full'>
-                      Rp.{item.Saldo}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div> */}
           <div class="list-form py-5">
             <div class="container">
               <h6 class="mb-3">List Semua Rekening</h6>
