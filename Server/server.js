@@ -234,6 +234,32 @@ app.post("/tarik-tunai", (req, res) => {
     })
 })
 
+app.post("/cek-rekening", (req, res) => {
+    const { NoKartu, RekId } = req.body
+
+    pool.query("SELECT * FROM Rekening WHERE NoKartu = ?", [NoKartu], (err, rows) => {
+        if (err) {
+            console.log("Error executing query", err)
+            res.status(500).json({ error: "Internal server error" })
+            return
+        }
+
+        if (rows.length === 0) {
+            res.status(404).json({ error: "Rekening tidak ditemukan" })
+            return
+        }
+
+       const rekening = rows[0]
+
+       if (rekening.ID === RekId) {
+        res.status(403).json({ error: "Tidak bisa transfer ke rekening milik sendiri" })
+        return
+       }
+
+       res.json(rekening)
+    })
+})
+
 app.post("/transfer", (req, res) => {
     const { DariRekId, NoRekTujuan, Nominal, Pin } = req.body
 
@@ -252,7 +278,7 @@ app.post("/transfer", (req, res) => {
         const rekeningPengirim = rows[0]
 
         if (NoRekTujuan === rekeningPengirim.NoKartu) {
-            res.status(400).json({ error: "Tidak bisa transfer ke rekening sendiri"})
+            res.status(400).json({ error: "Tidak bisa transfer ke rekening milik sendiri"})
             return
         }
 
