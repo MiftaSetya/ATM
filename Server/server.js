@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const express = require("express");
 const cors = require('cors')
 const bodyParser = require('body-parser');
+const e = require("express");
 
 const app = express()
 app.use(cors())
@@ -96,7 +97,7 @@ app.post("/rekeningbaru", (req, res) => {
 
         pool.query("SELECT * FROM Rekening WHERE ID = ?", [newAccountId], (err, rows) => {
             if (err) {
-                res.json("Error executing query", err)
+                console.log("Error executing query", err)
                 res.status(500).json({ error: "Internal server error" })
                 return
             }
@@ -116,7 +117,7 @@ app.post("/rekeningbaru", (req, res) => {
     })
 })
 
-app.post("/virtual-account", (req, res) => {
+app.post("/virtual-account-baru", (req, res) => {
     const { Pemilik, NoTelepon, Jenis, Pin } = req.body
 
     if (!(/^\d{10,13}$/).test(NoTelepon)) {
@@ -152,7 +153,7 @@ app.post("/virtual-account", (req, res) => {
     
             pool.query("SELECT * FROM VirtualAccount WHERE ID = ?", [newAccountId], (err, rows) => {
                 if (err) {
-                    res.json("Error executing query", err)
+                    console.log("Error executing query", err)
                     res.status(500).json({ error: "Internal server error" })
                     return
                 }
@@ -171,7 +172,7 @@ app.post("/setor-tunai", (req, res) => {
 
     pool.query("SELECT * FROM Rekening WHERE ID = ?", [RekeningId], (err, rows) => {
         if (err) {
-            res.json("Error executing query", err)
+            console.log("Error executing query", err)
             res.status(500).json({ error: "Internal server error" })
             return
         }
@@ -202,6 +203,7 @@ app.post("/tarik-tunai", (req, res) => {
 
     pool.query("SELECT * FROM Rekening WHERE ID = ?", [RekeningId], (err, rows) => {
         if (err) {
+            console.log(err)
             res.status(500).json({ error: "Internal server error" })
             return
         }
@@ -222,6 +224,7 @@ app.post("/tarik-tunai", (req, res) => {
 
         pool.query("UPDATE Rekening SET Saldo = ? WHERE ID = ?", [ saldoBaru, RekeningId ], (err, result) => {
             if (err) {
+                console.log(err)
                 res.status(500).json({ error: "Internal server error" })
                 return
             }
@@ -345,7 +348,19 @@ app.post("/transfer", (req, res) => {
 app.get("/rekening", (req, res) => {
     pool.query("SELECT * FROM Rekening", (err, rows) => {
         if (err) {
-            res.json("Gagal mendapatkan semua rekening")
+            console.log("Gagal mendapatkan semua rekening", err)
+            res.status(500).json({ error: "Internal server error" })
+            return
+        }
+
+        res.json(rows)
+    })
+})
+
+app.get("/virtual-account", (req, res) => {
+    pool.query("SELECT * FROM VirtualAccount", (err, rows) => {
+        if (err) {
+            console.log("Gagal mendapatkan semua virtual account", err)
             res.status(500).json({ error: "Internal server error" })
             return
         }
