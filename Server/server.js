@@ -168,7 +168,7 @@ app.post("/virtual-account-baru", (req, res) => {
 })
 
 app.post("/setor-tunai", (req, res) => {
-    const { RekeningId, Nominal } = req.body
+    const { RekeningId, Nominal, Pin } = req.body
 
     pool.query("SELECT * FROM Rekening WHERE ID = ?", [RekeningId], (err, rows) => {
         if (err) {
@@ -183,6 +183,11 @@ app.post("/setor-tunai", (req, res) => {
         }
 
         const rekening = rows[0]
+
+        if (rekening.Pin !== Pin) {
+            res.status(403).json({ error: "Pin yang anda masukkan salah" })
+            return
+        }
 
         const saldoBaru = parseInt(rekening.Saldo)  + parseInt(Nominal)
 
@@ -199,7 +204,7 @@ app.post("/setor-tunai", (req, res) => {
 })
 
 app.post("/tarik-tunai", (req, res) => {
-    const { RekeningId, Nominal } = req.body
+    const { RekeningId, Nominal, Pin } = req.body
 
     pool.query("SELECT * FROM Rekening WHERE ID = ?", [RekeningId], (err, rows) => {
         if (err) {
@@ -214,6 +219,11 @@ app.post("/tarik-tunai", (req, res) => {
         }
 
         const rekening = rows[0]
+
+        if (rekening.Pin !== Pin) {
+            res.status(403).json({ error: "Pin yang anda masukkan salah" })
+            return
+        }
 
         const saldoBaru = parseInt(rekening.Saldo) - parseInt(Nominal)
 
@@ -371,27 +381,15 @@ app.post("/transfer", (req, res) => {
 })
 
 // GET ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-app.get("/rekening", (req, res, next) => {
-    pool.getConnection((err, connection) => {
+app.get("/rekening", (req, res) => {
+    pool.query("SELECT * FROM Rekening", (err, rows) => {
         if (err) {
-            return next(err)
+            console.log("Gagal mendapatkan semua rekening", err)
+            res.status(500).json({ error: "Internal server error" })
+            return
         }
 
-        connection.query("SELECT * FROM Rekening", (err, rows) => {
-            connection.release()
-
-            // if (err) {
-            //     console.log("Gagal mendapatkan semua rekening", err)
-            //     res.status(500).json({ error: "Internal server error" })
-            //     return
-            // }
-
-            if (err) {
-                return next(err)
-            }
-    
-            res.json(rows)
-        })
+        res.json(rows)
     })
 })
 
