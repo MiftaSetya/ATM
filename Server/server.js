@@ -183,7 +183,7 @@ app.post("/setor-tunai", (req, res) => {
 
         const rekening = rows[0]
 
-        const saldoBaru = rekening.Saldo + Nominal
+        const saldoBaru = parseInt(rekening.Saldo)  + parseInt(Nominal)
 
         pool.query("UPDATE Rekening SET Saldo = ? WHERE ID = ?", [ saldoBaru, RekeningId ], (err, result) => {
             if (err) {
@@ -213,9 +213,9 @@ app.post("/tarik-tunai", (req, res) => {
 
         const rekening = rows[0]
 
-        const saldoBaru = rekening.Saldo - Nominal
+        const saldoBaru = parseInt(rekening.Saldo) - parseInt(Nominal)
 
-        if (saldoBaru < rekening.MinimalSaldo) {
+        if (saldoBaru < parseInt(rekening.MinimalSaldo)) {
             res.status(403).json({ error: `Saldo tidak boleh kurang dari Rp.${rekening.MinimalSaldo}` })
             return
         }
@@ -258,7 +258,7 @@ app.post("/transfer", (req, res) => {
             return
         }
 
-        if (rekeningPengirim.Saldo < Nominal) {
+        if (parseInt(rekeningPengirim.Saldo) < parseInt(Nominal)) {
             res.status(403).json({ error: `Saldo tidak mencukupi` })
             return
         }
@@ -299,9 +299,9 @@ app.post("/transfer", (req, res) => {
                     break;
             }
 
-            const saldoSetelahTransfer = rekeningPengirim.Saldo - Nominal - biayaAdmin
+            const saldoSetelahTransfer = parseInt(rekeningPengirim.Saldo) - parseInt(Nominal) - parseInt(biayaAdmin)
 
-            if (saldoSetelahTransfer < rekeningPengirim.MinimalSaldo) {
+            if (saldoSetelahTransfer < parseInt(rekeningPengirim.MinimalSaldo)) {
                 res.status(403).json({ error: `Saldo tidak boleh kurang dari Rp.${rekeningPengirim.MinimalSaldo}` })
                 return
             }
@@ -313,7 +313,7 @@ app.post("/transfer", (req, res) => {
                     return
                 }
 
-                const saldoPenerima = rekeningPenerima.Saldo + Nominal
+                const saldoPenerima = parseInt(rekeningPenerima.Saldo) + parseInt(Nominal)
 
                 pool.query("UPDATE Rekening SET Saldo = ? WHERE ID = ?", [ saldoPenerima, rekeningPenerima.ID ], (err, result) => {
                     if (err) {
