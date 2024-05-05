@@ -168,7 +168,7 @@ app.post("/virtual-account-baru", (req, res) => {
 })
 
 app.post("/setor-tunai", (req, res) => {
-    const { RekeningId, Nominal } = req.body
+    const { RekeningId, Nominal, Pin } = req.body
 
     pool.query("SELECT * FROM Rekening WHERE ID = ?", [RekeningId], (err, rows) => {
         if (err) {
@@ -183,6 +183,11 @@ app.post("/setor-tunai", (req, res) => {
         }
 
         const rekening = rows[0]
+
+        if (rekening.Pin !== Pin) {
+            res.status(403).json({ error: "Pin yang anda masukkan salah" })
+            return
+        }
 
         const saldoBaru = parseInt(rekening.Saldo)  + parseInt(Nominal)
 
@@ -199,7 +204,7 @@ app.post("/setor-tunai", (req, res) => {
 })
 
 app.post("/tarik-tunai", (req, res) => {
-    const { RekeningId, Nominal } = req.body
+    const { RekeningId, Nominal, Pin } = req.body
 
     pool.query("SELECT * FROM Rekening WHERE ID = ?", [RekeningId], (err, rows) => {
         if (err) {
@@ -214,6 +219,11 @@ app.post("/tarik-tunai", (req, res) => {
         }
 
         const rekening = rows[0]
+
+        if (rekening.Pin !== Pin) {
+            res.status(403).json({ error: "Pin yang anda masukkan salah" })
+            return
+        }
 
         const saldoBaru = parseInt(rekening.Saldo) - parseInt(Nominal)
 
@@ -436,7 +446,7 @@ app.get("/user", (req, res) => {
     })
 })
 
-const PORT = process.env.EXPRESS_PORT || 3000
+const PORT = process.env.EXPRESS_PORT
 app.listen(PORT, () => {
     console.log(`Server running in port ${PORT}`)
 })
