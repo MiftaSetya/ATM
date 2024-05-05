@@ -371,15 +371,27 @@ app.post("/transfer", (req, res) => {
 })
 
 // GET ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-app.get("/rekening", (req, res) => {
-    pool.query("SELECT * FROM Rekening", (err, rows) => {
+app.get("/rekening", (req, res, next) => {
+    pool.getConnection((err, connection) => {
         if (err) {
-            console.log("Gagal mendapatkan semua rekening", err)
-            res.status(500).json({ error: "Internal server error" })
-            return
+            return next(err)
         }
 
-        res.json(rows)
+        connection.query("SELECT * FROM Rekening", (err, rows) => {
+            connection.release()
+
+            // if (err) {
+            //     console.log("Gagal mendapatkan semua rekening", err)
+            //     res.status(500).json({ error: "Internal server error" })
+            //     return
+            // }
+
+            if (err) {
+                return next(err)
+            }
+    
+            res.json(rows)
+        })
     })
 })
 
@@ -436,7 +448,7 @@ app.get("/user", (req, res) => {
     })
 })
 
-const PORT = process.env.EXPRESS_PORT || 3000
+const PORT = process.env.EXPRESS_PORT
 app.listen(PORT, () => {
     console.log(`Server running in port ${PORT}`)
 })
